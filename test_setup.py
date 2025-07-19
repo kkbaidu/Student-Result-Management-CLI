@@ -5,6 +5,7 @@ Test script to verify the setup and database connection
 
 import sys
 import os
+from load_config import load_config
 
 def test_imports():
     """Test if required modules can be imported"""
@@ -30,15 +31,7 @@ def test_database_connection():
     print("\nTesting database connection...")
     try:
         from main import StudentResultManager
-        
-        # Database configuration
-        db_config = {
-            'host': 'localhost',
-            'database': 'student_results_db',
-            'user': 'student_user',
-            'password': 'password123',
-            'port': 5432
-        }
+        db_config = load_config()
         
         manager = StudentResultManager(db_config)
         if manager.connect_to_database():
