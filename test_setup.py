@@ -56,9 +56,9 @@ def test_database_connection():
 def test_sample_data_file():
     """Test if sample data file exists"""
     print("\nTesting sample data file...")
-    if os.path.exists("sample_data.txt"):
+    if os.path.exists("ug_student_data.txt"):
         print("✓ Sample data file exists")
-        with open("sample_data.txt", "r") as f:
+        with open("ug_student_data.txt", "r") as f:
             lines = f.readlines()
             print(f"✓ Found {len(lines)} student records")
         return True

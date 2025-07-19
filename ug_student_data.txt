@@ -1,0 +1,17 @@
+20250001, Kwesi Mensah, Information Technology, 78
+20250002, Adwoa Serwaa, Actuarial Science, 85
+20250003, Kofi Opoku, Geological Engineering, 70
+20250004, Ama Nsiah, Biochemistry, 81
+20250005, Kwame Nkrumah, Environmental Science, 68
+20250006, Yaa Asantewaa, Linguistics, 88
+20250007, Yaw Boahen, Political Science, 75
+20250008, Akua Mansah, Social Work, 89
+20250009, Kwabena Owusu, Business Administration, 77
+20250010, Nana Ama, Civil Engineering, 91
+20250011, Abena Safo, Fine Arts, 67
+20250012, Kojo Antwi, Ethnomusicology, 59
+20250013, Esi Adjei, Religious Studies, 73
+20250014, Papa Kwaku, Archaeology, 74
+20250015, Afia Pokuaa, Nutrition and Food Science, 90
+20250016, Mensah Kwesi, Law, 86
+20250017, Akosua Boatemaa, Public Health, 83

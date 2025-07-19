@@ -390,9 +390,9 @@ def main():
             choice = input("\nEnter your choice (1-6): ").strip()
             
             if choice == '1':
-                filename = input("Enter the filename to load (default: sample_data.txt): ").strip()
+                filename = input("Enter the filename to load (default: ug_student_data.txt): ").strip()
                 if not filename:
-                    filename = 'sample_data.txt'
+                    filename = 'ug_student_data.txt'
                 
                 students = manager.read_student_data(filename)
                 if students:
