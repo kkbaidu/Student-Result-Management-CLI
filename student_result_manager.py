@@ -196,6 +196,7 @@ class StudentResultManager:
                 print(f"No student found with index number: {index_number}")
                 return
             
+            print(f"Student with index number {index_number} found. Find details below:")
             print("\n" + "="*50)
             print("STUDENT DETAILS")
             print("="*50)

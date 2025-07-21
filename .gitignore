@@ -3,3 +3,5 @@ config.env
 .venv
 
 __pycache__
+
+summary_report.txt
