@@ -23,6 +23,9 @@ class StudentResultManager:
     
     def create_table(self):
         """Create the student_results table if it doesn't exist."""
+        if not self.connection or not self.cursor:
+            print("✗ Error: Database connection is not established. Call connect_to_database() first.")
+            return False
         try:
             create_table_query = """
             CREATE TABLE IF NOT EXISTS student_results (
@@ -100,6 +103,10 @@ class StudentResultManager:
         """Insert student data into database."""
         inserted_count = 0
         updated_count = 0
+
+        if not self.connection or not self.cursor:
+            print("✗ Error: Database connection is not established. Call connect_to_database() first.")
+            return False
         
         for student in students:
             try:
@@ -153,6 +160,9 @@ class StudentResultManager:
     
     def view_all_records(self):
         """View all student records."""
+        if not self.connection or not self.cursor:
+            print("✗ Error: Database connection is not established. Call connect_to_database() first.")
+            return False
         try:
             query = """
             SELECT index_number, full_name, course, score, grade 
@@ -183,6 +193,9 @@ class StudentResultManager:
     
     def view_student_by_index(self, index_number):
         """View a specific student by index number."""
+        if not self.connection or not self.cursor:
+            print("✗ Error: Database connection is not established. Call connect_to_database() first.")
+            return False
         try:
             query = """
             SELECT index_number, full_name, course, score, grade 
@@ -212,6 +225,9 @@ class StudentResultManager:
     
     def update_student_score(self, index_number, new_score):
         """Update a student's score and recalculate grade."""
+        if not self.connection or not self.cursor:
+            print("✗ Error: Database connection is not established. Call connect_to_database() first.")
+            return False
         try:
             # Check if student exists
             check_query = "SELECT id FROM student_results WHERE index_number = %s"
@@ -244,10 +260,14 @@ class StudentResultManager:
     
     def export_summary_report(self, filename):
         """Export summary report to file."""
+        if not self.connection or not self.cursor:
+            print("✗ Error: Database connection is not established. Call connect_to_database() first.")
+            return False
         try:
             # Get total count
             self.cursor.execute("SELECT COUNT(*) as total FROM student_results")
-            total_students = self.cursor.fetchone()['total']
+            result = self.cursor.fetchone()
+            total_students = result['total'] if result and 'total' in result else 0
             
             # Get grade distribution
             self.cursor.execute("""

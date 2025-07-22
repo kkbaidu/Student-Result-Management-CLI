@@ -392,6 +392,10 @@ class ModernGUI:
         
     def _login_thread(self, username, password):
         """Login thread to prevent GUI freezing."""
+        # self.auth_manager = AuthManager(self.db_config)
+        if not self.auth_manager.cursor or not self.auth_manager.connection:
+            print("✗ Error: AuthManager is not initialized.")
+            return False
         try:
             # Simulate the original login process
             import hashlib
@@ -426,7 +430,7 @@ class ModernGUI:
     def _login_success(self):
         """Handle successful login."""
         self.hide_loading()
-        messagebox.showinfo("Success", f"Welcome back, {self.current_user['full_name']}!")
+        messagebox.showinfo("Success", f"Welcome back, {self.current_user['full_name'] if self.current_user and 'full_name' in self.current_user else 0}!")
         self.create_main_dashboard()
         
     def _login_failed(self, error_message):
@@ -474,6 +478,10 @@ class ModernGUI:
         
     def _register_thread(self, full_name, username, email, password):
         """Registration thread to prevent GUI freezing."""
+        if not self.auth_manager.cursor or not self.auth_manager.connection:
+            print("✗ Error: AuthManager is not initialized.")
+            return False
+
         try:
             # Check if user exists
             check_query = "SELECT id FROM users WHERE username = %s OR email = %s"
@@ -579,7 +587,7 @@ class ModernGUI:
         
         user_label = ctk.CTkLabel(
             user_frame,
-            text=f"Welcome,\n{self.current_user['full_name']}",
+            text=f"Welcome,\n{self.current_user['full_name'] if self.current_user and 'full_name' in self.current_user else 0}",
             font=ctk.CTkFont(size=16, weight="bold"),
             text_color=self.colors['accent']
         )
@@ -587,7 +595,7 @@ class ModernGUI:
         
         role_label = ctk.CTkLabel(
             user_frame,
-            text=f"Role: {self.current_user['role'].title()}",
+            text=f"Role: {self.current_user['role'].title() if self.current_user and 'role' in self.current_user else 0}",
             font=ctk.CTkFont(size=12),
             text_color="gray"
         )
@@ -662,18 +670,23 @@ class ModernGUI:
         """Create quick statistics cards."""
         stats_frame = ctk.CTkFrame(self.main_content, corner_radius=10)
         stats_frame.pack(fill="x", padx=20, pady=10)
+
+        if not self.student_manager.cursor or not self.student_manager.connection:
+            print("✗ Error: StudentResultManager is not initialized.")
+            return False
         
         # Get statistics from database
         try:
             # Total students
             self.student_manager.cursor.execute("SELECT COUNT(*) as total FROM student_results")
-            total_students = self.student_manager.cursor.fetchone()['total']
+            result = self.student_manager.cursor.fetchone()
+            total_students = result['total'] if result and 'total' in result else 0
             
             # Average score
             self.student_manager.cursor.execute("SELECT AVG(score) as avg_score FROM student_results")
             avg_result = self.student_manager.cursor.fetchone()
-            avg_score = round(avg_result['avg_score'], 1) if avg_result['avg_score'] else 0
-            
+            avg_score = round(avg_result['avg_score'], 1) if avg_result and 'avg_score' in avg_result else 0
+
             # Grade distribution
             self.student_manager.cursor.execute("""
                 SELECT grade, COUNT(*) as count 
@@ -771,6 +784,10 @@ class ModernGUI:
         """Create charts for the dashboard."""
         charts_frame = ctk.CTkFrame(self.main_content, corner_radius=10)
         charts_frame.pack(fill="both", expand=True, padx=20, pady=10)
+
+        if not self.student_manager.cursor or not self.student_manager.connection:
+            print("✗ Error: StudentResultManager is not initialized.")
+            return False
         
         try:
             # Get data for charts
@@ -961,6 +978,10 @@ class ModernGUI:
             
     def load_students_data(self):
         """Load students data from database."""
+        if not self.student_manager.cursor or not self.student_manager.connection:
+            print("✗ Error: StudentResultManager is not initialized.")
+            return False
+
         try:
             query = """
             SELECT index_number, full_name, course, score, grade 
@@ -980,17 +1001,17 @@ class ModernGUI:
         for item in self.students_tree.get_children():
             self.students_tree.delete(item)
             
+        # Color code by grade
+        grade_colors = {
+            'A': 'green',
+            'B': 'blue', 
+            'C': 'orange',
+            'D': 'red',
+            'F': 'darkred'
+        }
+
         # Insert new items
         for student in students:
-            # Color code by grade
-            grade_colors = {
-                'A': 'green',
-                'B': 'blue', 
-                'C': 'orange',
-                'D': 'red',
-                'F': 'darkred'
-            }
-            
             self.students_tree.insert("", "end", values=(
                 student['index_number'],
                 student['full_name'],
@@ -1110,6 +1131,10 @@ class ModernGUI:
         
     def save_new_student(self, dialog):
         """Save new student to database."""
+        if not self.student_manager.cursor or not self.student_manager.connection:
+            print("✗ Error: StudentResultManager is not initialized.")
+            return False
+        
         try:
             index_number = self.add_index_entry.get().strip()
             full_name = self.add_name_entry.get().strip()
@@ -1226,6 +1251,10 @@ class ModernGUI:
         
     def update_student(self, dialog, index_number):
         """Update student in database."""
+        if not self.student_manager.cursor or not self.student_manager.connection:
+            print("✗ Error: StudentResultManager is not initialized.")
+            return False
+        
         try:
             full_name = self.edit_name_entry.get().strip()
             course = self.edit_course_entry.get().strip()
@@ -1243,7 +1272,8 @@ class ModernGUI:
             SET full_name = %s, course = %s, score = %s, grade = %s
             WHERE index_number = %s
             """
-            self.student_manager.cursor.execute(update_query, (full_name, course, score, grade, index_number))
+            # Ensure index_number is treated as string
+            self.student_manager.cursor.execute(update_query, (full_name, course, score, grade, str(index_number)))
             self.student_manager.connection.commit()
             
             messagebox.showinfo("Success", "Student updated successfully!")
@@ -1266,9 +1296,13 @@ class ModernGUI:
         student_data = item['values']
         
         if messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete {student_data[1]}?"):
+            if not self.student_manager.cursor or not self.student_manager.connection:
+                print("✗ Error: StudentResultManager is not initialized.")
+                return False
             try:
                 delete_query = "DELETE FROM student_results WHERE index_number = %s"
-                self.student_manager.cursor.execute(delete_query, (student_data[0],))
+                # Ensure index_number is treated as string
+                self.student_manager.cursor.execute(delete_query, (str(student_data[0]),))
                 self.student_manager.connection.commit()
                 
                 messagebox.showinfo("Success", "Student deleted successfully!")
@@ -1411,21 +1445,21 @@ class ModernGUI:
             # Row 1
             row1 = ctk.CTkFrame(stats_container, fg_color="transparent")
             row1.pack(fill="x", pady=5)
-            
-            self.create_stat_card(row1, "📚 Total Students", str(stats['total_students']), "left")
-            self.create_stat_card(row1, "📈 Average Score", f"{stats['avg_score']:.1f}%", "left")
-            self.create_stat_card(row1, "🏆 Highest Score", f"{stats['highest_score']}%", "left")
-            self.create_stat_card(row1, "📉 Lowest Score", f"{stats['lowest_score']}%", "right")
-            
+
+            self.create_stat_card(row1, "📚 Total Students", str(stats['total_students'] if stats and 'total_students' in stats else 0), "left")
+            self.create_stat_card(row1, "📈 Average Score", f"{stats['avg_score']:.1f}%" if stats and 'avg_score' in stats else "0.0%", "left")
+            self.create_stat_card(row1, "🏆 Highest Score", f"{stats['highest_score']}%" if stats and 'highest_score' in stats else "0%", "left")
+            self.create_stat_card(row1, "📉 Lowest Score", f"{stats['lowest_score']}%" if stats and 'lowest_score' in stats else "0%", "right")
+
             # Row 2
             row2 = ctk.CTkFrame(stats_container, fg_color="transparent")
             row2.pack(fill="x", pady=5)
-            
-            self.create_stat_card(row2, "✅ Pass Rate", f"{stats['pass_rate']:.1f}%", "left")
-            self.create_stat_card(row2, "🎯 Excellence Rate", f"{stats['excellence_rate']:.1f}%", "left")
-            self.create_stat_card(row2, "📊 Standard Deviation", f"{stats['std_dev']:.1f}", "left")
-            self.create_stat_card(row2, "📋 Total Courses", str(stats['total_courses']), "right")
-            
+
+            self.create_stat_card(row2, "✅ Pass Rate", f"{stats['pass_rate']:.1f}%" if stats and 'pass_rate' in stats else "0.0%", "left")
+            self.create_stat_card(row2, "🎯 Excellence Rate", f"{stats['excellence_rate']:.1f}%" if stats and 'excellence_rate' in stats else "0.0%", "left")
+            self.create_stat_card(row2, "📊 Standard Deviation", f"{stats['std_dev']:.1f}" if stats and 'std_dev' in stats else "0.0", "left")
+            self.create_stat_card(row2, "📋 Total Courses", str(stats['total_courses'] if stats and 'total_courses' in stats else 0), "right")
+
             # Charts section
             charts_frame = ctk.CTkFrame(parent, corner_radius=10)
             charts_frame.pack(fill="both", expand=True, padx=20, pady=20)
@@ -1464,22 +1498,29 @@ class ModernGUI:
         
     def get_analytics_data(self):
         """Get comprehensive analytics data from database."""
+        if not self.student_manager.cursor or not self.student_manager.connection:
+            print("✗ Error: StudentResultManager is not initialized.")
+            return False
+        
         try:
             # Basic statistics
             self.student_manager.cursor.execute("SELECT COUNT(*) as total FROM student_results")
-            total_students = self.student_manager.cursor.fetchone()['total']
-            
+            total = self.student_manager.cursor.fetchone()
+            total_students = total['total'] if total else 0
+
             self.student_manager.cursor.execute("SELECT AVG(score) as avg, MAX(score) as max, MIN(score) as min FROM student_results")
             score_stats = self.student_manager.cursor.fetchone()
             
             # Pass rate (score >= 50)
             self.student_manager.cursor.execute("SELECT COUNT(*) as passes FROM student_results WHERE score >= 50")
-            passes = self.student_manager.cursor.fetchone()['passes']
+            passes = self.student_manager.cursor.fetchone()
+            passes = passes['passes'] if passes else 0
             pass_rate = (passes / total_students * 100) if total_students > 0 else 0
             
             # Excellence rate (score >= 80)
             self.student_manager.cursor.execute("SELECT COUNT(*) as excellent FROM student_results WHERE score >= 80")
-            excellent = self.student_manager.cursor.fetchone()['excellent']
+            excellent = self.student_manager.cursor.fetchone()
+            excellent = excellent['excellent'] if excellent else 0
             excellence_rate = (excellent / total_students * 100) if total_students > 0 else 0
             
             # Standard deviation
@@ -1489,13 +1530,14 @@ class ModernGUI:
             
             # Total courses
             self.student_manager.cursor.execute("SELECT COUNT(DISTINCT course) as total_courses FROM student_results")
-            total_courses = self.student_manager.cursor.fetchone()['total_courses']
-            
+            total_courses = self.student_manager.cursor.fetchone()
+            total_courses = total_courses['total_courses'] if total_courses else 0
+
             return {
                 'total_students': total_students,
-                'avg_score': score_stats['avg'] if score_stats['avg'] else 0,
-                'highest_score': score_stats['max'] if score_stats['max'] else 0,
-                'lowest_score': score_stats['min'] if score_stats['min'] else 0,
+                'avg_score': score_stats['avg'] if score_stats and 'avg' in score_stats else 0,
+                'highest_score': score_stats['max'] if score_stats and 'max' in score_stats else 0,
+                'lowest_score': score_stats['min'] if score_stats and 'min' in score_stats else 0,
                 'pass_rate': pass_rate,
                 'excellence_rate': excellence_rate,
                 'std_dev': std_dev,
@@ -1509,6 +1551,9 @@ class ModernGUI:
             
     def create_overview_charts(self, parent, stats):
         """Create overview charts."""
+        if not self.student_manager.cursor or not self.student_manager.connection:
+            print("✗ Error: StudentResultManager is not initialized.")
+            return False
         try:
             if stats['total_students'] == 0:
                 no_data_label = ctk.CTkLabel(
@@ -1933,6 +1978,9 @@ class ModernGUI:
             
     def generate_detailed_report(self):
         """Generate a detailed report with all student information."""
+        if not self.student_manager.cursor or not self.student_manager.connection:
+            print("✗ Error: StudentResultManager is not initialized.")
+            return False
         try:
             filename = filedialog.asksaveasfilename(
                 title="Save Detailed Report",
@@ -2005,6 +2053,9 @@ Grade Distribution:
             
     def generate_course_report(self):
         """Generate a course-wise performance report."""
+        if not self.student_manager.cursor or not self.student_manager.connection:
+            print("✗ Error: StudentResultManager is not initialized.")
+            return False
         try:
             filename = filedialog.asksaveasfilename(
                 title="Save Course Report",
@@ -2123,6 +2174,9 @@ COURSE ANALYSIS
         
     def export_data(self, dialog):
         """Export data in selected format."""
+        if not self.student_manager.cursor or not self.student_manager.connection:
+            print("✗ Error: StudentResultManager is not initialized.")
+            return False
         try:
             format_type = self.export_format_var.get()
             
@@ -2531,6 +2585,9 @@ Account Created: {self.current_user['created_at'].strftime('%Y-%m-%d')}"""
         
     def create_manual_backup(self):
         """Create manual backup."""
+        if not self.student_manager.cursor or not self.student_manager.connection:
+            print("✗ Error: StudentResultManager is not initialized.")
+            return False
         try:
             # Export all data to JSON
             filename = filedialog.asksaveasfilename(

@@ -78,21 +78,21 @@ def show_system_info():
 ╠══════════════════════════════════════════════════════════════╣
 ║                                                              ║
 ║  📋 Features:                                                ║
-║     • Secure user authentication                            ║
-║     • PostgreSQL database integration                       ║
-║     • Advanced analytics and reporting                      ║
-║     • Multi-format data import/export                       ║
-║     • Beautiful charts and visualizations                   ║
-║     • Real-time performance tracking                        ║
+║     • Secure user authentication                             ║
+║     • PostgreSQL database integration                        ║
+║     • Advanced analytics and reporting                       ║
+║     • Multi-format data import/export                        ║
+║     • Beautiful charts and visualizations                    ║
+║     • Real-time performance tracking                         ║
 ║                                                              ║
 ║  🔧 Requirements:                                            ║
-║     • Python 3.7+                                           ║
-║     • PostgreSQL database                                   ║
-║     • Required packages (see requirements.txt)              ║
+║     • Python 3.7+                                            ║
+║     • PostgreSQL database                                    ║
+║     • Required packages (see requirements.txt)               ║
 ║                                                              ║
-║  📁 Data Formats Supported:                                 ║
-║     • TXT, CSV, JSON, Excel                                 ║
-║     • Automatic format detection                            ║
+║  📁 Data Formats Supported:                                  ║
+║     • TXT, CSV, JSON, Excel                                  ║
+║     • Automatic format detection                             ║
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
 """
@@ -108,27 +108,32 @@ def show_quick_stats():
         manager = StudentResultManager(db_config)
         
         if manager.connect_to_database():
+            if not manager.cursor or not manager.connection:
+                raise Exception("Database connection not established.")
+            
             try:
                 # Get basic stats
                 manager.cursor.execute("SELECT COUNT(*) as total FROM student_results")
-                total_students = manager.cursor.fetchone()['total']
-                
+                total_students = manager.cursor.fetchone()
+                total_students = total_students['total'] if total_students else 0
+
                 manager.cursor.execute("SELECT AVG(score) as avg FROM student_results")
                 avg_result = manager.cursor.fetchone()
-                avg_score = round(avg_result['avg'], 1) if avg_result['avg'] else 0
+                avg_score = round(avg_result['avg'], 1) if avg_result and avg_result['avg'] else 0
                 
                 manager.cursor.execute("SELECT COUNT(DISTINCT course) as courses FROM student_results")
-                total_courses = manager.cursor.fetchone()['courses']
-                
+                total_courses = manager.cursor.fetchone()
+                total_courses = total_courses['courses'] if total_courses else 0
+
                 stats = f"""
 ╔══════════════════════════════════════════════════════════════╗
 ║                      QUICK STATISTICS                        ║
 ╠══════════════════════════════════════════════════════════════╣
 ║                                                              ║
 ║  📊 Current Data:                                            ║
-║     • Total Students: {total_students:<10}                           ║
+║     • Total Students: {total_students:<10}                   ║
 ║     • Average Score:  {avg_score}%                           ║
-║     • Total Courses:  {total_courses:<10}                            ║
+║     • Total Courses:  {total_courses:<10}                    ║
 ║                                                              ║
 ║  🔗 Database Status:  ✅ Connected                           ║
 ║                                                              ║
@@ -144,7 +149,7 @@ def show_quick_stats():
 ╠══════════════════════════════════════════════════════════════╣
 ║                                                              ║
 ║  ⚠️  No student data found                                   ║
-║     Import data to see statistics                           ║
+║     Import data to see statistics                            ║
 ║                                                              ║
 ║  🔗 Database Status:  ✅ Connected                           ║
 ║                                                              ║
@@ -159,7 +164,7 @@ def show_quick_stats():
 ╠══════════════════════════════════════════════════════════════╣
 ║                                                              ║
 ║  ❌ Cannot connect to database                               ║
-║     Please check your configuration in config.env           ║
+║     Please check your configuration in config.env            ║
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
 """
@@ -171,7 +176,7 @@ def show_quick_stats():
 ║                         ERROR                                ║
 ╠══════════════════════════════════════════════════════════════╣
 ║                                                              ║
-║  ❌ Error accessing database: {str(e)[:30]}...              ║
+║  ❌ Error accessing database: {str(e)[:30]}...               ║
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
 """
@@ -185,34 +190,34 @@ def show_help():
 ╠══════════════════════════════════════════════════════════════╣
 ║                                                              ║
 ║  🖥️  CLI Mode:                                               ║
-║     Classic command-line interface with menu-driven         ║
-║     navigation. Perfect for server environments or          ║
-║     users who prefer terminal interfaces.                   ║
+║     Classic command-line interface with menu-driven          ║
+║     navigation. Perfect for server environments or           ║
+║     users who prefer terminal interfaces.                    ║
 ║                                                              ║
 ║  🖼️  GUI Mode:                                               ║
-║     Modern graphical interface with:                        ║
-║     • Beautiful dashboard with charts                       ║
-║     • Interactive student management                        ║
-║     • Advanced analytics and insights                       ║
-║     • Export capabilities (PDF, Excel, CSV)                 ║
-║     • Real-time data visualization                          ║
+║     Modern graphical interface with:                         ║
+║     • Beautiful dashboard with charts                        ║
+║     • Interactive student management                         ║
+║     • Advanced analytics and insights                        ║
+║     • Export capabilities (PDF, Excel, CSV)                  ║
+║     • Real-time data visualization                           ║
 ║                                                              ║
 ║  📁 Data Import:                                             ║
-║     Supports multiple formats:                              ║
-║     • Text files (.txt) - comma-separated                   ║
-║     • CSV files (.csv)                                      ║
-║     • JSON files (.json)                                    ║
-║     • Excel files (.xlsx)                                   ║
+║     Supports multiple formats:                               ║
+║     • Text files (.txt) - comma-separated                    ║
+║     • CSV files (.csv)                                       ║
+║     • JSON files (.json)                                     ║
+║     • Excel files (.xlsx)                                    ║
 ║                                                              ║
 ║  🔧 Setup Requirements:                                      ║
-║     1. Install PostgreSQL database                          ║
-║     2. Configure database settings in config.env            ║
-║     3. Install Python dependencies                          ║
-║     4. Run setup.sh for initial configuration               ║
+║     1. Install PostgreSQL database                           ║
+║     2. Configure database settings in config.env             ║
+║     3. Install Python dependencies                           ║
+║     4. Run setup.sh for initial configuration                ║
 ║                                                              ║
 ║  📋 Sample Data Format:                                      ║
-║     Index, Full Name, Course, Score                         ║
-║     20250001, John Doe, Computer Science, 85                ║
+║     Index, Full Name, Course, Score                          ║
+║     20250001, John Doe, Computer Science, 85                 ║
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
 """
@@ -319,7 +324,7 @@ def launch_gui():
 ║  • numpy                                                     ║
 ║  • pillow                                                    ║
 ║                                                              ║
-║  Run: pip install -r requirements.txt                       ║
+║  Run: pip install -r requirements.txt                        ║
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
 """

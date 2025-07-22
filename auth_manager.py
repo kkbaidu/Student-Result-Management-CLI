@@ -25,6 +25,10 @@ class AuthManager:
     
     def create_users_table(self):
         """Create the users table if it doesn't exist."""
+        if not self.connection or not self.cursor:
+            print("✗ Database connection is not established.")
+            return False
+        
         try:
             create_table_query = """
             CREATE TABLE IF NOT EXISTS users (
@@ -64,6 +68,10 @@ class AuthManager:
         print("\n" + "="*50)
         print("USER REGISTRATION")
         print("="*50)
+
+        if not self.connection or not self.cursor:
+            print("✗ Database connection is not established.")
+            return False
         
         try:
             # Get user input
@@ -132,6 +140,10 @@ class AuthManager:
         print("\n" + "="*50)
         print("USER LOGIN")
         print("="*50)
+
+        if not self.connection or not self.cursor:
+            print("✗ Database connection is not established.")
+            return False
         
         try:
             username = input("Enter username: ").strip()

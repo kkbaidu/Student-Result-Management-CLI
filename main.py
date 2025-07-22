@@ -115,7 +115,7 @@ def main():
     try:
         current_user = auth_manager.get_current_user()
         while auth_manager.is_logged_in():
-            display_main_menu(current_user['full_name'])
+            display_main_menu(current_user['full_name'] if current_user and 'full_name' in current_user else 0)
             choice = input("\nEnter your choice (1-8): ").strip()
             
             if choice == '1':
