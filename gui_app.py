@@ -1566,37 +1566,13 @@ class ModernGUI:
                 return
                 
             # Create figure with subplots
-            fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(14, 8), facecolor='#3b3b3b')
-            
+            fig, (ax3, ax4) = plt.subplots(2, figsize=(14, 8), facecolor='#3b3b3b')
+
             # Grade distribution
             self.student_manager.cursor.execute("""
                 SELECT grade, COUNT(*) as count FROM student_results 
                 GROUP BY grade ORDER BY grade
             """)
-            grade_data = self.student_manager.cursor.fetchall()
-            
-            if grade_data:
-                grades = [item['grade'] for item in grade_data]
-                counts = [item['count'] for item in grade_data]
-                colors = ['#28a745', '#17a2b8', '#ffc107', '#fd7e14', '#dc3545']
-                
-                bars = ax1.bar(grades, counts, color=colors[:len(grades)], alpha=0.8)
-                ax1.set_title('Grade Distribution', color='white', fontsize=14, weight='bold')
-                ax1.set_xlabel('Grades', color='white')
-                ax1.set_ylabel('Number of Students', color='white')
-                ax1.tick_params(colors='white')
-                ax1.set_facecolor('#3b3b3b')
-                
-                for bar in bars:
-                    height = bar.get_height()
-                    ax1.text(bar.get_x() + bar.get_width()/2., height,
-                           f'{int(height)}', ha='center', va='bottom', color='white', fontweight='bold')
-                
-                # Pie chart
-                ax2.pie(counts, labels=grades, colors=colors[:len(grades)], autopct='%1.1f%%',
-                       startangle=90, textprops={'color': 'white'})
-                ax2.set_title('Grade Distribution %', color='white', fontsize=14, weight='bold')
-                ax2.set_facecolor('#3b3b3b')
             
             # Score distribution histogram
             self.student_manager.cursor.execute("SELECT score FROM student_results")
